@@ -11,6 +11,7 @@
 
 
 # Compiled Object files
+ipch*
 *.slo
 *.lo
 *.o
