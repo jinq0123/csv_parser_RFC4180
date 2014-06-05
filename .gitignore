@@ -1,3 +1,12 @@
+# Debug files
+*Release*
+*Debug*
+
+# Editor
+*.swp
+*.vcxproj.user
+
+
 # Compiled Object files
 *.slo
 *.lo
