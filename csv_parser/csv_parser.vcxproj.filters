@@ -18,5 +18,13 @@
     <ClCompile Include="test_run.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="csv_parser.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="csv_parser.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

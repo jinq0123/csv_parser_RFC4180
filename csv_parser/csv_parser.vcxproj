@@ -74,7 +74,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="csv_parser.cpp" />
     <ClCompile Include="test_run.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="csv_parser.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
