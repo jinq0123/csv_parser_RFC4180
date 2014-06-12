@@ -10,7 +10,6 @@ void RecordHandler(std::vector<std::string>& record, int sequence)
     {
         std::cout << std::endl << "Records: " << sequence << std::endl;
     }
-    record.clear();
 }
 
 int main()

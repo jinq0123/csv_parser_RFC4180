@@ -90,9 +90,13 @@ TransferFuncMap::value_type init_value[] =
 TransferFuncMap CCsvParser::m_transferMap(init_value, init_value + FUNC_NUM);
 
 
-int RecordStatus(int preStatus, char ch)
+int CCsvParser::RecordStatus(int preStatus, char ch)
 {
-	return 0;
+	if ( 0 == m_transferMap.count(preStatus) )
+	{
+		return CSV_RECORD_STATUS_ERROR_BUTT;
+	}
+	return m_transferMap[preStatus](ch);
 }
 
 bool isTextData(int status)
@@ -100,27 +104,23 @@ bool isTextData(int status)
     return (CSV_RECORD_STATUS_ESCAPED_FIELD == status) || (CSV_RECORD_STATUS_NON_ESCAPED_FIELD == status);
 }
 
-bool isFieldEnd(int status)
+bool IsInnerFieldEnd(int status)
 {
     return (CSV_RECORD_STATUS_FIELD_END == status);
 }
 
-void FieldEnd(std::vector<std::string>& record, std::string& field)
+bool IsLastFieldEnd(int status)
 {
-    std::cout << field << "  ||  ";
-    record.push_back(field);
-    field.clear();
+    return (CSV_RECORD_STATUS_ESCAPED_SUB == status)
+		|| (CSV_RECORD_STATUS_NON_ESCAPED_FIELD == status)
+		|| (CSV_RECORD_STATUS_FIELD_END == status);
 }
 
-bool LastFieldEnd(int status, std::vector<std::string>& record, std::string& field)
+void FieldEnd(std::vector<std::string>& record, std::string& field)
 {
-    // error check
-    if ( (CSV_RECORD_STATUS_ESCAPED_SUB != status) && (CSV_RECORD_STATUS_NON_ESCAPED_FIELD != status) )
-    {
-        return false;
-    }
-    FieldEnd(record, field);
-    return true;
+    // std::cout << field << "  ||  ";
+    record.push_back(field);
+    field.clear();
 }
 
 bool CCsvParser::open(std::string filename)
@@ -131,23 +131,16 @@ bool CCsvParser::open(std::string filename)
 
 int CCsvParser::parser(void (*RecordHandler)(std::vector<std::string>&, int))
 {
-    std::string header;
-    std::getline(fin, header);
-    // TODO: deal with header
-
     int recordCount = 0; // count without header
     std::string lineData;
     std::vector<std::string> record;
     std::string field;
-    bool newField = true;
+	int curStatus = CSV_RECORD_STATUS_INIT;
+
     while(std::getline(fin, lineData))
     {
-        recordCount++;
-        int curStatus = CSV_RECORD_STATUS_FIELD_END;
-        record.clear();
-        field.clear();
+        //recordCount++;
         // parser line to record
-        // std::cout << lineData << std::endl;
         for (size_t i =0; i < lineData.size(); i++)
         {
             curStatus = RecordStatus(curStatus, lineData[i]);
@@ -155,15 +148,30 @@ int CCsvParser::parser(void (*RecordHandler)(std::vector<std::string>&, int))
             {
                 field.push_back(lineData[i]);
             }
-            else if (isFieldEnd(curStatus))
+            else if (IsInnerFieldEnd(curStatus))
             {
                 FieldEnd(record, field);
             }
         }
         // line end, deal with last field
-        LastFieldEnd(curStatus, record, field);
-        RecordHandler(record, recordCount);
+		if ( IsLastFieldEnd(curStatus) )
+		{
+			recordCount++;
+			FieldEnd(record, field);
+			RecordHandler(record, recordCount);
+			record.clear();
+			curStatus = CSV_RECORD_STATUS_INIT;
+		}
+		else
+		{
+			field.push_back(16);
+			field.push_back(10);
+		}
     }
+	if (curStatus != CSV_RECORD_STATUS_INIT)
+	{
+		std::cout << "CSV format error!" << std::endl;
+	}
     fin.close();  // TODO
     return recordCount;
 }

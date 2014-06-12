@@ -20,7 +20,7 @@ typedef enum CSV_RECORD_STATUS
 
 const int FUNC_NUM = 6;
 typedef int (*TransferFunc)(char);
-typedef std::map<CSV_RECORD_STATUS, TransferFunc> TransferFuncMap;
+typedef std::map<int, TransferFunc> TransferFuncMap;
 
 class CCsvParser
 {
@@ -30,5 +30,6 @@ public:
 private:
 	std::ifstream fin;
 	static TransferFuncMap m_transferMap;
+	int RecordStatus(int preStatus, char ch);
 };
 #endif
