@@ -3,16 +3,18 @@
 
 #include "csv_parser.h"
 
-typedef enum CSV_RECORD_STATUS
+int TransferInit(char ch)
 {
-    // CSV_RECORD_STATUS_INIT = 1001,  // use CSV_RECORD_STATUS_FIELD_END instead
-    CSV_RECORD_STATUS_ESCAPED_PRE = 1002,
-    CSV_RECORD_STATUS_ESCAPED_SUB,
-    CSV_RECORD_STATUS_ESCAPED_FIELD,
-    CSV_RECORD_STATUS_NON_ESCAPED_FIELD,
-    CSV_RECORD_STATUS_FIELD_END,
-    CSV_RECORD_STATUS_ERROR_BUTT
-}CSV_RECORD_STATUS;
+    switch ( ch )
+    {
+    case ESCAPE:
+        return CSV_RECORD_STATUS_ESCAPED_PRE;
+    case DELIMITER:
+        return CSV_RECORD_STATUS_FIELD_END;
+    default:  // TEXTDATA
+        return CSV_RECORD_STATUS_NON_ESCAPED_FIELD;
+     }
+}
 
 int TransferNonEscapedField(char ch)
 {
@@ -20,7 +22,7 @@ int TransferNonEscapedField(char ch)
     {
     case DELIMITER:
         return CSV_RECORD_STATUS_FIELD_END;
-    case QUOTE:
+    case ESCAPE:
         return CSV_RECORD_STATUS_ESCAPED_PRE;
     default:
         return CSV_RECORD_STATUS_NON_ESCAPED_FIELD;
@@ -31,7 +33,7 @@ int TransferEscapedField(char ch)
 {
     switch ( ch )
     {
-    case QUOTE:
+    case ESCAPE:
         return CSV_RECORD_STATUS_ESCAPED_SUB;
     default:
         return CSV_RECORD_STATUS_ESCAPED_FIELD;
@@ -42,7 +44,7 @@ int TransferEscapedPre(char ch)
 {
     switch ( ch )
     {
-    case QUOTE:
+    case ESCAPE:
         return CSV_RECORD_STATUS_ESCAPED_SUB;
     default:
         return CSV_RECORD_STATUS_ESCAPED_FIELD;
@@ -55,7 +57,7 @@ int TransferEscapedSub(char ch)
     {
     case DELIMITER:
         return CSV_RECORD_STATUS_FIELD_END;
-    case QUOTE:
+    case ESCAPE:
         return CSV_RECORD_STATUS_ESCAPED_FIELD;
     default:
         return CSV_RECORD_STATUS_NON_ESCAPED_FIELD;
@@ -66,7 +68,7 @@ int TransferFieldEnd(char ch)
 {
     switch ( ch )
     {
-    case QUOTE:
+    case ESCAPE:
         return CSV_RECORD_STATUS_ESCAPED_PRE;
     case DELIMITER:
         return CSV_RECORD_STATUS_FIELD_END;
@@ -75,29 +77,22 @@ int TransferFieldEnd(char ch)
      }
 }
 
+
+TransferFuncMap::value_type init_value[] = 
+{
+	TransferFuncMap::value_type(CSV_RECORD_STATUS_INIT, TransferInit),
+	TransferFuncMap::value_type(CSV_RECORD_STATUS_NON_ESCAPED_FIELD, TransferNonEscapedField),
+	TransferFuncMap::value_type(CSV_RECORD_STATUS_ESCAPED_PRE, TransferEscapedPre),
+	TransferFuncMap::value_type(CSV_RECORD_STATUS_ESCAPED_SUB, TransferEscapedSub),
+	TransferFuncMap::value_type(CSV_RECORD_STATUS_ESCAPED_FIELD, TransferEscapedField),
+	TransferFuncMap::value_type(CSV_RECORD_STATUS_FIELD_END, TransferFieldEnd)
+};
+TransferFuncMap CCsvParser::m_transferMap(init_value, init_value + FUNC_NUM);
+
+
 int RecordStatus(int preStatus, char ch)
 {
-    switch ( preStatus )
-    {
-    //case CSV_RECORD_STATUS_INIT:
-    //    return TransferInit(ch);
-    // Field
-    case CSV_RECORD_STATUS_NON_ESCAPED_FIELD:
-        return TransferNonEscapedField(ch);
-    case CSV_RECORD_STATUS_ESCAPED_FIELD:
-        return TransferEscapedField(ch);
-    // Quote in escaped filed
-    case CSV_RECORD_STATUS_ESCAPED_PRE:
-        return TransferEscapedPre(ch);
-    case CSV_RECORD_STATUS_ESCAPED_SUB:
-        return TransferEscapedSub(ch);
-    // Field End
-    case CSV_RECORD_STATUS_FIELD_END:
-        return TransferFieldEnd(ch);
-    // Error
-    default:
-        return CSV_RECORD_STATUS_ERROR_BUTT;
-    }
+	return 0;
 }
 
 bool isTextData(int status)
