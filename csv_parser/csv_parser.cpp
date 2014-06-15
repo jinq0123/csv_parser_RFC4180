@@ -127,6 +127,27 @@ inline void InnerStatusAction(int status, char ch, std::string& item, std::vecto
 	// else // Do nothing.
 }
 
+// return: true -- record end, false -- record continue
+inline bool HandleLineEnd(int& status, std::string& item, std::vector<std::string>& record)
+{
+	if ( (CSV_RECORD_SWITCH == status))
+	{
+		// Empty line
+	}
+	else if ( (CSV_ENCLOSURE_ENTER == status) || (CSV_ENCLOSURE_INNER == status) )
+	{
+		status = CSV_ENCLOSURE_INNER;  // Update status
+		item.push_back(LF_CHAR);
+		item.push_back(CR_CHAR);
+	}
+	else
+	{
+		status = CSV_RECORD_SWITCH;  // Update status
+		ActionItemSwitch(0, item, record);
+	}
+	return (CSV_RECORD_SWITCH == status);
+}
+
 bool CCsvParser::Init(std::string filename)
 {
     fin.open(filename, std::ios::in);
@@ -150,21 +171,10 @@ int CCsvParser::parser(void (*RecordHandler)(std::vector<std::string>&, int))
 			InnerStatusAction(curStatus, lineData[i], item, record);
         }
         // line end, LF CR
-		if ( (CSV_RECORD_SWITCH == curStatus))
+		bool isRecordEnd = HandleLineEnd(curStatus, item, record);
+		if ( isRecordEnd )
 		{
-			// Empty line
-		}
-		else if ( (CSV_ENCLOSURE_ENTER == curStatus) || (CSV_ENCLOSURE_INNER == curStatus) )
-		{
-			curStatus = CSV_ENCLOSURE_INNER;  // Update status
-			item.push_back(LF_CHAR);
-			item.push_back(CR_CHAR);
-		}
-		else
-		{
-			curStatus = CSV_RECORD_SWITCH;  // Update status
 			recordCount++;
-			ActionItemSwitch(0, item, record);
 			RecordHandler(record, recordCount);
 			record.clear();
 		}

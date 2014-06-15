@@ -21,8 +21,8 @@
  * @li    34    0x22    double quote  "
  * @li    44    0x2C    comma  ,
 */
-const char DELIMITER_CHAR = 0x2c;  // COMMA ,
-const char ENCLOSURE_CHAR = 0x21;      // DQUOTE "
+const char DELIMITER_CHAR = 0x2c;      // COMMA ,
+const char ENCLOSURE_CHAR = 0x22;      // DQUOTE "
 const char LF_CHAR = 0x0A;
 const char CR_CHAR = 0x0D;
 
