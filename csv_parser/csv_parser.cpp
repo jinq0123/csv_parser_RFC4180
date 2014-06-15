@@ -3,127 +3,131 @@
 
 #include "csv_parser.h"
 
-int TransferInit(char ch)
+typedef enum CSV_PARSER_STATUS_ENUM
 {
-    switch ( ch )
-    {
-    case ESCAPE:
-        return CSV_RECORD_STATUS_ESCAPED_PRE;
-    case DELIMITER:
-        return CSV_RECORD_STATUS_FIELD_END;
-    default:  // TEXTDATA
-        return CSV_RECORD_STATUS_NON_ESCAPED_FIELD;
-     }
-}
+    CSV_RECORD_SWITCH,
+    CSV_ITEM_SWITCH,
+    CSV_ENCLOSURE_NONE,
+    CSV_ENCLOSURE_ENTER,
+    CSV_ENCLOSURE_INNER,
+    CSV_ENCLOSURE_PAUSE,
+    CSV_PARSER_STATUS_ERROR_BUTT
+}CSV_PARSER_STATUS_ENUM;
+typedef int (*TRANS_FUNC)(char);
+typedef void (*INNER_ACTION_FUNC)(char ch, std::string& item, std::vector<std::string>& record);
 
-int TransferNonEscapedField(char ch)
+// status transfer
+inline int TransItemSwitch(char ch)
 {
-    switch ( ch )
-    {
-    case DELIMITER:
-        return CSV_RECORD_STATUS_FIELD_END;
-    case ESCAPE:
-        return CSV_RECORD_STATUS_ESCAPED_PRE;
-    default:
-        return CSV_RECORD_STATUS_NON_ESCAPED_FIELD;
-    }
-}
-
-int TransferEscapedField(char ch)
-{
-    switch ( ch )
-    {
-    case ESCAPE:
-        return CSV_RECORD_STATUS_ESCAPED_SUB;
-    default:
-        return CSV_RECORD_STATUS_ESCAPED_FIELD;
-    }
-}
-
-int TransferEscapedPre(char ch)
-{
-    switch ( ch )
-    {
-    case ESCAPE:
-        return CSV_RECORD_STATUS_ESCAPED_SUB;
-    default:
-        return CSV_RECORD_STATUS_ESCAPED_FIELD;
-    }
-}
-
-int TransferEscapedSub(char ch)
-{
-    switch ( ch )
-    {
-    case DELIMITER:
-        return CSV_RECORD_STATUS_FIELD_END;
-    case ESCAPE:
-        return CSV_RECORD_STATUS_ESCAPED_FIELD;
-    default:
-        return CSV_RECORD_STATUS_NON_ESCAPED_FIELD;
-    }
-}
-
-int TransferFieldEnd(char ch)
-{
-    switch ( ch )
-    {
-    case ESCAPE:
-        return CSV_RECORD_STATUS_ESCAPED_PRE;
-    case DELIMITER:
-        return CSV_RECORD_STATUS_FIELD_END;
-    default:
-        return CSV_RECORD_STATUS_NON_ESCAPED_FIELD;
-     }
-}
-
-
-TransferFuncMap::value_type init_value[] = 
-{
-	TransferFuncMap::value_type(CSV_RECORD_STATUS_INIT, TransferInit),
-	TransferFuncMap::value_type(CSV_RECORD_STATUS_NON_ESCAPED_FIELD, TransferNonEscapedField),
-	TransferFuncMap::value_type(CSV_RECORD_STATUS_ESCAPED_PRE, TransferEscapedPre),
-	TransferFuncMap::value_type(CSV_RECORD_STATUS_ESCAPED_SUB, TransferEscapedSub),
-	TransferFuncMap::value_type(CSV_RECORD_STATUS_ESCAPED_FIELD, TransferEscapedField),
-	TransferFuncMap::value_type(CSV_RECORD_STATUS_FIELD_END, TransferFieldEnd)
-};
-TransferFuncMap CCsvParser::m_transferMap(init_value, init_value + FUNC_NUM);
-
-
-int CCsvParser::RecordStatus(int preStatus, char ch)
-{
-	if ( 0 == m_transferMap.count(preStatus) )
+	switch ( ch )
 	{
-		return CSV_RECORD_STATUS_ERROR_BUTT;
+	case ENCLOSURE_CHAR:
+		return CSV_ENCLOSURE_ENTER;
+	case DELIMITER_CHAR:
+		return CSV_ITEM_SWITCH;
+	default:
+		return CSV_ENCLOSURE_NONE;
 	}
-	return m_transferMap[preStatus](ch);
 }
-
-bool isTextData(int status)
+inline int TransRecordSwitch(char ch)
 {
-    return (CSV_RECORD_STATUS_ESCAPED_FIELD == status) || (CSV_RECORD_STATUS_NON_ESCAPED_FIELD == status);
+	return TransItemSwitch(ch);
 }
-
-bool IsInnerFieldEnd(int status)
+inline int transEnclosureNone(char ch)
 {
-    return (CSV_RECORD_STATUS_FIELD_END == status);
+	return TransItemSwitch(ch);
 }
-
-bool IsLastFieldEnd(int status)
+inline int transEnclosureEnter(char ch)
 {
-    return (CSV_RECORD_STATUS_ESCAPED_SUB == status)
-		|| (CSV_RECORD_STATUS_NON_ESCAPED_FIELD == status)
-		|| (CSV_RECORD_STATUS_FIELD_END == status);
+	switch ( ch )
+	{
+	case ENCLOSURE_CHAR:
+		return CSV_ENCLOSURE_PAUSE;
+	default:
+		return CSV_ENCLOSURE_INNER;
+	}
 }
-
-void FieldEnd(std::vector<std::string>& record, std::string& field)
+inline int transEnclosureInner(char ch)
 {
-    // std::cout << field << "  ||  ";
-    record.push_back(field);
-    field.clear();
+	return transEnclosureEnter(ch);
+}
+inline int transEnclosurePause(char ch)
+{
+	switch ( ch )
+	{
+	case ENCLOSURE_CHAR:
+		return CSV_ENCLOSURE_INNER;
+	case DELIMITER_CHAR:
+		return CSV_ITEM_SWITCH;
+	default:
+		return CSV_ENCLOSURE_NONE;
+	}
 }
 
-bool CCsvParser::open(std::string filename)
+TRANS_FUNC transFunc[] = 
+{
+	TransRecordSwitch,
+	TransItemSwitch,
+	transEnclosureNone,
+	transEnclosureEnter,
+	transEnclosureInner,
+	transEnclosurePause
+};
+
+inline void UdateStatus(int& status, char ch)
+{
+	if ( (status < 0) || (status >= CSV_PARSER_STATUS_ERROR_BUTT) )
+	{
+		status = CSV_PARSER_STATUS_ERROR_BUTT;
+	}
+	else
+	{
+		status = transFunc[status](ch);
+	}
+}
+
+inline void ActionItemSwitch(char ch, std::string& item, std::vector<std::string>& record)
+{
+	record.push_back(item);
+    item.clear();
+}
+inline void ActionEnclosureNone(char ch, std::string& item, std::vector<std::string>& record)
+{
+	item.push_back(ch);
+}
+inline void ActionEnclosureInner(char ch, std::string& item, std::vector<std::string>& record)
+{
+	item.push_back(ch);
+}
+inline void ActionEnclosureEnter(char ch, std::string& item, std::vector<std::string>& record)
+{
+	// Do nothing
+}
+inline void ActionEnclosurePause(char ch, std::string& item, std::vector<std::string>& record)
+{
+	// Do nothing
+}
+
+INNER_ACTION_FUNC innerActionFunc[] =
+{
+	0,  // unreachable
+	ActionItemSwitch,
+	ActionEnclosureNone,
+	ActionEnclosureEnter,
+	ActionEnclosureInner,
+	ActionEnclosurePause
+};
+
+inline void InnerStatusAction(int status, char ch, std::string& item, std::vector<std::string>& record)
+{
+	if ( (status > 0) && (status < CSV_PARSER_STATUS_ERROR_BUTT) )
+	{
+		innerActionFunc[status](ch, item, record);
+	}
+	// else // Do nothing.
+}
+
+bool CCsvParser::Init(std::string filename)
 {
     fin.open(filename, std::ios::in);
     return fin.is_open();
@@ -134,41 +138,38 @@ int CCsvParser::parser(void (*RecordHandler)(std::vector<std::string>&, int))
     int recordCount = 0; // count without header
     std::string lineData;
     std::vector<std::string> record;
-    std::string field;
-	int curStatus = CSV_RECORD_STATUS_INIT;
+    std::string item;
+	int curStatus = CSV_RECORD_SWITCH;
 
     while(std::getline(fin, lineData))
     {
-        //recordCount++;
-        // parser line to record
+        // Inner line data
         for (size_t i =0; i < lineData.size(); i++)
         {
-            curStatus = RecordStatus(curStatus, lineData[i]);
-            if (isTextData(curStatus))
-            {
-                field.push_back(lineData[i]);
-            }
-            else if (IsInnerFieldEnd(curStatus))
-            {
-                FieldEnd(record, field);
-            }
+            UdateStatus(curStatus, lineData[i]);
+			InnerStatusAction(curStatus, lineData[i], item, record);
         }
-        // line end, deal with last field
-		if ( IsLastFieldEnd(curStatus) )
+        // line end, LF CR
+		if ( (CSV_RECORD_SWITCH == curStatus))
 		{
-			recordCount++;
-			FieldEnd(record, field);
-			RecordHandler(record, recordCount);
-			record.clear();
-			curStatus = CSV_RECORD_STATUS_INIT;
+			// Empty line
+		}
+		else if ( (CSV_ENCLOSURE_ENTER == curStatus) || (CSV_ENCLOSURE_INNER == curStatus) )
+		{
+			curStatus = CSV_ENCLOSURE_INNER;  // Update status
+			item.push_back(LF_CHAR);
+			item.push_back(CR_CHAR);
 		}
 		else
 		{
-			field.push_back(16);
-			field.push_back(10);
+			curStatus = CSV_RECORD_SWITCH;  // Update status
+			recordCount++;
+			ActionItemSwitch(0, item, record);
+			RecordHandler(record, recordCount);
+			record.clear();
 		}
     }
-	if (curStatus != CSV_RECORD_STATUS_INIT)
+	if (curStatus != CSV_RECORD_SWITCH)
 	{
 		std::cout << "CSV format error!" << std::endl;
 	}

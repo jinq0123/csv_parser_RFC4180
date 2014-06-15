@@ -1,35 +1,41 @@
+/**
+ * csv_parser.h
+ *
+ * @author Jackon Yang <jiekunyang@gmail.com>
+ */
+
 #ifndef _CSV_PARSER_H_
 #define _CSV_PARSER_H_
 #include <string>
 #include <fstream>
 #include <map>
 
-const char DELIMITER = ',';  // COMMA
-const char ESCAPE = '"';      // QUOTE
+/**
+ * @li DEC is how it would be represented in decimal form (base 10)
+ * @li HEX is how it would be represented in hexadecimal format (base 16)
+ *
+ * @li    DEC   HEX     Character Name
+ * @li    10    0x0A    LF (NL line feed, new line)
+ * @li    13    0x0D    CR (carriage return)
+ * @li    32    0x20    space
+ * @li    34    0x22    double quote  "
+ * @li    44    0x2C    comma  ,
+*/
+const char DELIMITER_CHAR = 0x2c;  // COMMA ,
+const char ENCLOSURE_CHAR = 0x21;      // DQUOTE "
+const char LF_CHAR = 0x0A;
+const char CR_CHAR = 0x0D;
 
-typedef enum CSV_RECORD_STATUS
-{
-    CSV_RECORD_STATUS_INIT = 1001,
-    CSV_RECORD_STATUS_ESCAPED_PRE,
-    CSV_RECORD_STATUS_ESCAPED_SUB,
-    CSV_RECORD_STATUS_ESCAPED_FIELD,
-    CSV_RECORD_STATUS_NON_ESCAPED_FIELD,
-    CSV_RECORD_STATUS_FIELD_END,
-    CSV_RECORD_STATUS_ERROR_BUTT  // no transfer func
-}CSV_RECORD_STATUS;
-
-const int FUNC_NUM = 6;
-typedef int (*TransferFunc)(char);
-typedef std::map<int, TransferFunc> TransferFuncMap;
 
 class CCsvParser
 {
 public:
-	bool open(std::string filename);
-	int parser(void (*RecordHandler)(std::vector<std::string>&, int));
+    //CCsvParser();
+	//~CCsvParser();
+
+    bool Init(std::string filename);
+    int parser(void (*RecordHandler)(std::vector<std::string>&, int));
 private:
-	std::ifstream fin;
-	static TransferFuncMap m_transferMap;
-	int RecordStatus(int preStatus, char ch);
+    std::ifstream fin;
 };
 #endif

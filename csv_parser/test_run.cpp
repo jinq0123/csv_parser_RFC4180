@@ -15,7 +15,7 @@ void RecordHandler(std::vector<std::string>& record, int sequence)
 int main()
 {
 	CCsvParser parser;
-	if (parser.open("test_data.csv"))
+	if (parser.Init("test_data.csv"))
 	{
 		std::cout << parser.parser(RecordHandler) << std::endl;
 	}
