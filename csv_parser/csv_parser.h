@@ -31,7 +31,7 @@ class CCsvParser
 {
 public:
     //CCsvParser();
-	//~CCsvParser();
+    //~CCsvParser();
 
     bool Init(std::string filename);
     int parser(void (*RecordHandler)(std::vector<std::string>&, int));
