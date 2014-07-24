@@ -22,7 +22,7 @@ int main()
 	CCsvParser parser;
 	if (parser.Init("test_data.csv"))
 	{
-		std::cout << "Record Number: " << parser.parser(RecordHandler) << std::endl;
+		std::cout << "Record Number: " << parser.Parse(RecordHandler) << std::endl;
 	}
 	// check output
 	std::string ss;
