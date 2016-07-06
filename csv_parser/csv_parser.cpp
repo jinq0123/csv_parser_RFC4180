@@ -19,19 +19,23 @@ void CCsvParser::Reset()
     quoteStatus = CSV_ENCLOSURE_NONE;
     rowCache.clear();
     fieldCache.clear();
+    parseError.clear();
 }
 
-void CCsvParser::Parse(const std::string& file_path)
+bool CCsvParser::Parse(const std::string& file_path)
 {
-    Parse(std::ifstream(file_path));
+    // Todo: return open error.
+    return Parse(std::ifstream(file_path));
 }
 
-void CCsvParser::Parse(std::istream& is)
+bool CCsvParser::Parse(std::istream& is)
 {
     Reset();
     std::string line;
     while (std::getline(is, line))
         ParseLine(line);
+    // Todo: return read error
+    return parseError.empty();
 }
 
 // 当前 fieldCache 缓存的内容压入 record 并清空 fieldCache
