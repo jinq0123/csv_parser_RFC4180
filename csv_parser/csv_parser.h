@@ -2,51 +2,63 @@
  * csv_parser.h
  *
  * @author Jackon Yang <jiekunyang@gmail.com>
+ * @author Jin Qing (http://blog.csdn.net/jq0123)
  */
 
 #ifndef _CSV_PARSER_H_
 #define _CSV_PARSER_H_
-#include <string>
-#include <fstream>
-#include <map>
 
-/**
- * @li DEC is how it would be represented in decimal form (base 10)
- * @li HEX is how it would be represented in hexadecimal format (base 16)
- *
- * @li    DEC   HEX     Character Name
- * @li    10    0x0A    LF (NL line feed, new line)
- * @li    13    0x0D    CR (carriage return)
- * @li    32    0x20    space
- * @li    34    0x22    double quote  "
- * @li    44    0x2C    comma  ,
-*/
+#include <iosfwd>  // for istream
+#include <string>
+#include <vector>
 
 class CCsvParser
 {
 public:
-    bool Init(std::string filename);
-    int Parse(void (*RecordHandler)(std::vector<std::string>&, int));
-    CCsvParser(char delemiter=0x2c, char enclosure=0x22, char LF=0x0A, char CR=0x0D)
-        :DELIMITER_CHAR(delemiter), ENCLOSURE_CHAR(enclosure), LF_CHAR(LF), CR_CHAR(CR)
-    {}
-    ~CCsvParser();
+    CCsvParser() {}
+    virtual ~CCsvParser() {};
+
+public:
+    void SetDelimiterChar(char delimiter) { delimiterChar = delimiter; }
+    void SetEnclosureChar(char enclosure) { enclosureChar = enclosure; }
+
+public:
+    void Parse(const std::string& file_path);
+    void Parse(std::istream& is);
+
+public:
+    size_t GetRowCount() const { return table.size(); }
+    size_t GetColCount() const { return GetRow(0).size(); }
+
+    using StrVec = std::vector<std::string>;
+    // 返回一行记录。索引从0开始。记录头也按记录返回。索引过界则返回空行。
+    const StrVec& GetRow(size_t row_index) const
+    {
+        if (row_index < table.size())
+            return table[row_index];
+        static StrVec empty;
+        return empty;
+    }
+
 private:
-    bool ParseRecord(std::vector<std::string>& record);
-    int StateAction(char ch, int quote_status, std::vector<std::string>& record);
-    void FieldHandler(std::vector<std::string>& record);
+    int PushChar(char ch);
+    void ParseLine(const std::string& line);
+    inline void PushField();
+    inline void PushRow();
 
-    std::vector<std::string> header;
+private:
+    char delimiterChar = ',';  // COMMA ,
+    char enclosureChar = '"';  // DQUOTE "
 
-    std::ifstream fin;
-    const char DELIMITER_CHAR;      // COMMA ,
-    const char ENCLOSURE_CHAR;      // DQUOTE "
-    const char LF_CHAR;             // <LF>
-    const char CR_CHAR;             // <CR>
+private:
+    using Record = StrVec;
+    using Table = std::vector<Record>;
+    Table table;
 
-    // 避免在循环内重复声明、定义变量
-    std::string lineData;
-    std::vector<std::string> recordCache;
+private:
+    int quoteStatus = 0;
+    Record recordCache;
     std::string fieldCache;
-};
+};  // class CCsvParser
+
 #endif
