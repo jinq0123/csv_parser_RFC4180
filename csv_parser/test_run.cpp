@@ -39,6 +39,8 @@ void run_tests()
 	test(R"(a"
 b)", 0, 0, "");  // 字段内有双引号，试图连接下行
 
+	test(R"("a"b"c")", 0, 0, R"(abc)");
+
 	// test from https://en.wikipedia.org/wiki/Comma-separated_values
 	test(R"(1997,Ford,E350)", 0, 2, "E350");
 	test(R"("1997","Ford","E350")", 0, 2, "E350");

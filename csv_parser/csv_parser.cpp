@@ -49,7 +49,7 @@ void CCsvParser::Parse(std::istream& is)
     }
 }
 
-// 当前 fieldCache 缓存的内容压入 record 并清空 fieldCache
+// 完成当前字段
 inline void CCsvParser::PushField()
 {
     rowCache.push_back(fieldCache);
@@ -71,7 +71,6 @@ void CCsvParser::FinishRow()
 // 压入一个字符，返回下个状态
 int CCsvParser::PushChar(char ch)
 {
-    // CSV_ENCLOSURE_NONE " CSV_ENCLOSURE_ENTER " CSV_ENCLOSURE_EXIT
     if ((delimiterChar == ch) && (CSV_ENCLOSURE_ENTER != quoteStatus))
     {
         PushField();
@@ -86,8 +85,7 @@ int CCsvParser::PushChar(char ch)
             return CSV_ENCLOSURE_ENTER;
         }
         // 状态转移到下一个状态码
-        // CSV_ENCLOSURE_NONE -> CSV_ENCLOSURE_ENTER
-        // CSV_ENCLOSURE_ENTER -> CSV_ENCLOSURE_EXIT
+        // CSV_ENCLOSURE_NONE -> CSV_ENCLOSURE_ENTER -> CSV_ENCLOSURE_EXIT
         return quoteStatus + 1;
     }
 
@@ -100,12 +98,12 @@ int CCsvParser::PushChar(char ch)
 // 解析一行字符
 void CCsvParser::ParseLine(const std::string& line)
 {
-    // Parse line to record
+    // Parse line to row.
     for (size_t i = 0; i < line.size(); i++)
         quoteStatus = PushChar(line[i]);
 
-    // Handle last field
-    if (CSV_ENCLOSURE_ENTER != quoteStatus)  // Row finished
+    // Row finish.
+    if (CSV_ENCLOSURE_ENTER != quoteStatus)
     {
         FinishRow();
         return;
