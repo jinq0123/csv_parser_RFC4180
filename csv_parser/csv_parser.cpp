@@ -28,12 +28,26 @@ bool CCsvParser::Parse(const std::string& file_path)
     return Parse(std::ifstream(file_path));
 }
 
+void IgnoreUtf8BOM(std::string& line)
+{
+    if ("\xEF\xBB\xBF" == line.substr(0, 3))
+        line = line.substr(3);
+}
+
 bool CCsvParser::Parse(std::istream& is)
 {
     Reset();
     std::string line;
+    bool first_line = true;
     while (std::getline(is, line))
+    {
+        if (first_line)
+        {
+            first_line = false;
+            IgnoreUtf8BOM(line);
+        }
         ParseLine(line);
+    }
     // Todo: return read error
     return parseError.empty();
 }

@@ -26,6 +26,10 @@ void run_tests()
 	test("a\nb", 1, 0, "b");
 	// test("a\r\nb", 0, 0, "a");
 	// test("a\r\nb", 1, 0, "b");
+	const std::string BOM("\xEF\xBB\xBF");
+	test(BOM + "a\nb", 0, 0, "a");
+	test(BOM + "a\nb", 1, 0, "b");
+	test("a\n" + BOM + "b", 1, 0, BOM + "b");
 	test(R"(abc)", 0, 0, "abc");
 
 	// test from https://en.wikipedia.org/wiki/Comma-separated_values
