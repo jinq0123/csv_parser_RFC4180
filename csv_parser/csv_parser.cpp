@@ -86,4 +86,3 @@ void CCsvParser::ParseLine(const std::string& line)
     // Record continue. Push '\n'.
     fieldCache.push_back('\n');
 }
-
