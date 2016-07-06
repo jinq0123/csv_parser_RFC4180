@@ -19,14 +19,12 @@ void CCsvParser::Reset()
     quoteStatus = CSV_ENCLOSURE_NONE;
     rowCache.clear();
     fieldCache.clear();
-    parseError.clear();
 }
 
-bool CCsvParser::Parse(const std::string& file_path)
+void CCsvParser::Parse(const std::string& file_path)
 {
-    // Todo: return open error.
     // 总是以binary打开，防止Windows下替换"\r\n".
-    return Parse(std::ifstream(file_path, std::ifstream::binary));
+    Parse(std::ifstream(file_path, std::ifstream::binary));
 }
 
 void IgnoreUtf8BOM(std::string& line)
@@ -35,7 +33,7 @@ void IgnoreUtf8BOM(std::string& line)
         line = line.substr(3);
 }
 
-bool CCsvParser::Parse(std::istream& is)
+void CCsvParser::Parse(std::istream& is)
 {
     Reset();
     std::string line;
@@ -49,8 +47,6 @@ bool CCsvParser::Parse(std::istream& is)
         }
         ParseLine(line);
     }
-    // Todo: return read error
-    return parseError.empty();
 }
 
 // 当前 fieldCache 缓存的内容压入 record 并清空 fieldCache

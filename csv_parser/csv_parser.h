@@ -24,9 +24,8 @@ public:
 
 public:
     void Reset();
-    bool Parse(const std::string& file_path);
-    bool Parse(std::istream& is);
-    const std::string& GetParseError() const { return parseError; }
+    void Parse(const std::string& file_path);
+    void Parse(std::istream& is);
 
 public:
     size_t GetRowCount() const { return table.size(); }
@@ -71,7 +70,6 @@ private:
     int quoteStatus = 0;
     Row rowCache;
     std::string fieldCache;
-    std::string parseError;
 };  // class CCsvParser
 
 #endif
