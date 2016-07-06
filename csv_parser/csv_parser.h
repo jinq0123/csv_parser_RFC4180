@@ -53,7 +53,7 @@ private:
     int PushChar(char ch);
     void ParseLine(const std::string& line);
     inline void PushField();
-    inline void PushRow();
+    void FinishRow();
 
 private:
     char delimiterChar = ',';  // COMMA ,

@@ -25,7 +25,8 @@ void CCsvParser::Reset()
 bool CCsvParser::Parse(const std::string& file_path)
 {
     // Todo: return open error.
-    return Parse(std::ifstream(file_path));
+    // 总是以binary打开，防止Windows下替换"\r\n".
+    return Parse(std::ifstream(file_path, std::ifstream::binary));
 }
 
 void IgnoreUtf8BOM(std::string& line)
@@ -59,9 +60,14 @@ inline void CCsvParser::PushField()
     fieldCache.clear();
 }
 
-// 压入一行记录
-inline void CCsvParser::PushRow()
+// 结束时压入一行记录
+void CCsvParser::FinishRow()
 {
+    // 允许以"\r\n"分行，最后一个字段可能有'\r'
+    if (!fieldCache.empty() && '\r' == *fieldCache.rbegin())
+        fieldCache.resize(fieldCache.size() - 1);
+
+    PushField();
     table.push_back(rowCache);
     rowCache.clear();
 }
@@ -103,13 +109,12 @@ void CCsvParser::ParseLine(const std::string& line)
         quoteStatus = PushChar(line[i]);
 
     // Handle last field
-    if (CSV_ENCLOSURE_ENTER != quoteStatus)  // Record finished
+    if (CSV_ENCLOSURE_ENTER != quoteStatus)  // Row finished
     {
-        PushField();
-        PushRow();
+        FinishRow();
         return;
     }
 
-    // Record continue. Push '\n'.
+    // '\n' in field. Push '\n'.
     fieldCache.push_back('\n');
 }

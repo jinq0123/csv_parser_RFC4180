@@ -24,8 +24,8 @@ void run_tests()
 	test("\"ab\r\nc\"", 0, 0, "ab\r\nc");
 	test("a\nb", 0, 0, "a");
 	test("a\nb", 1, 0, "b");
-	// test("a\r\nb", 0, 0, "a");
-	// test("a\r\nb", 1, 0, "b");
+	test("a\r\nb", 0, 0, "a");
+	test("a\r\nb", 1, 0, "b");
 	const std::string BOM("\xEF\xBB\xBF");
 	test(BOM + "a\nb", 0, 0, "a");
 	test(BOM + "a\nb", 1, 0, "b");
