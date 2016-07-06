@@ -23,6 +23,7 @@ public:
     void SetEnclosureChar(char enclosure) { enclosureChar = enclosure; }
 
 public:
+    void Reset();
     void Parse(const std::string& file_path);
     void Parse(std::istream& is);
 
@@ -37,6 +38,14 @@ public:
         if (row_index < table.size())
             return table[row_index];
         return emptyRow;
+    }
+    // 返回指定格子内容。索引从0开始。索引过界则返回空。
+    const std::string& GetGrid(size_t row_index, size_t col_index) const
+    {
+        const Row& row = GetRow(row_index);
+        if (col_index < row.size())
+            return row[row_index];
+        return emptyField;
     }
 
 private:
@@ -55,6 +64,7 @@ private:
 
 private:
     static const Row emptyRow;
+    static const std::string emptyField;
 
 private:
     int quoteStatus = 0;

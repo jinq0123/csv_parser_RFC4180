@@ -3,6 +3,7 @@
 #include <fstream>
 
 const CCsvParser::Row CCsvParser::emptyRow;
+const std::string CCsvParser::emptyField;
 
 // CSV 解析状态 -- 取决于 ENCLOSURE_CHAR(") 的个数
 enum
@@ -12,6 +13,14 @@ enum
     CSV_ENCLOSURE_EXIT
 };
 
+void CCsvParser::Reset()
+{
+    table.clear();
+    quoteStatus = CSV_ENCLOSURE_NONE;
+    rowCache.clear();
+    fieldCache.clear();
+}
+
 void CCsvParser::Parse(const std::string& file_path)
 {
     Parse(std::ifstream(file_path));
@@ -19,7 +28,7 @@ void CCsvParser::Parse(const std::string& file_path)
 
 void CCsvParser::Parse(std::istream& is)
 {
-    quoteStatus = CSV_ENCLOSURE_NONE;
+    Reset();
     std::string line;
     while (std::getline(is, line))
         ParseLine(line);
