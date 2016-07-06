@@ -2,6 +2,8 @@
 
 #include <fstream>
 
+const CCsvParser::Row CCsvParser::emptyRow;
+
 // CSV 解析状态 -- 取决于 ENCLOSURE_CHAR(") 的个数
 enum
 {
@@ -26,15 +28,15 @@ void CCsvParser::Parse(std::istream& is)
 // 当前 fieldCache 缓存的内容压入 record 并清空 fieldCache
 inline void CCsvParser::PushField()
 {
-    recordCache.push_back(fieldCache);
+    rowCache.push_back(fieldCache);
     fieldCache.clear();
 }
 
 // 压入一行记录
 inline void CCsvParser::PushRow()
 {
-    table.push_back(recordCache);
-    recordCache.clear();
+    table.push_back(rowCache);
+    rowCache.clear();
 }
 
 // 压入一个字符，返回下个状态

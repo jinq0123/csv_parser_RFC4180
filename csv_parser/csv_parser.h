@@ -30,14 +30,13 @@ public:
     size_t GetRowCount() const { return table.size(); }
     size_t GetColCount() const { return GetRow(0).size(); }
 
-    using StrVec = std::vector<std::string>;
+    using Row = std::vector<std::string>;
     // 返回一行记录。索引从0开始。记录头也按记录返回。索引过界则返回空行。
-    const StrVec& GetRow(size_t row_index) const
+    const Row& GetRow(size_t row_index) const
     {
         if (row_index < table.size())
             return table[row_index];
-        static StrVec empty;
-        return empty;
+        return emptyRow;
     }
 
 private:
@@ -51,13 +50,15 @@ private:
     char enclosureChar = '"';  // DQUOTE "
 
 private:
-    using Record = StrVec;
-    using Table = std::vector<Record>;
+    using Table = std::vector<Row>;
     Table table;
 
 private:
+    static const Row emptyRow;
+
+private:
     int quoteStatus = 0;
-    Record recordCache;
+    Row rowCache;
     std::string fieldCache;
 };  // class CCsvParser
 

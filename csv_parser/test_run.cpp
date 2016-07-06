@@ -18,8 +18,6 @@ int main()
 		std::cout << std::endl;
 	}
 
-	// check output
-	std::string ss;
-	std::cin >> ss;
+	std::cin.get();
 	return 0;
 }
