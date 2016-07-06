@@ -20,6 +20,8 @@ void test(const std::string& data,
 void run_tests()
 {
 	test("12,34,56", 0, 2, "56");
+	test("12,34,56", 0, 3, "");
+	test("12,34,56", 1, 2, "");
 	test("\"ab\nc\"", 0, 0, "ab\nc");
 	test("\"ab\r\nc\"", 0, 0, "ab\r\nc");
 	test("a\nb", 0, 0, "a");
@@ -30,7 +32,12 @@ void run_tests()
 	test(BOM + "a\nb", 0, 0, "a");
 	test(BOM + "a\nb", 1, 0, "b");
 	test("a\n" + BOM + "b", 1, 0, BOM + "b");
-	test(R"(abc)", 0, 0, "abc");
+	test("a\ra\nb", 0, 0, "a\ra");
+	test("a\ra\nb", 1, 0, "b");
+
+	test(R"(a"b)", 0, 0, "");  // 字段内有双引号，试图连接下行
+	test(R"(a"
+b)", 0, 0, "");  // 字段内有双引号，试图连接下行
 
 	// test from https://en.wikipedia.org/wiki/Comma-separated_values
 	test(R"(1997,Ford,E350)", 0, 2, "E350");
