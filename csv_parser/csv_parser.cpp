@@ -57,7 +57,7 @@ inline void CCsvParser::PushField()
 }
 
 // 结束时压入一行记录
-void CCsvParser::FinishRow()
+inline void CCsvParser::FinishRow()
 {
     // 允许以"\r\n"分行，最后一个字段可能有'\r'
     if (!fieldCache.empty() && '\r' == *fieldCache.rbegin())
@@ -69,7 +69,7 @@ void CCsvParser::FinishRow()
 }
 
 // 压入一个字符，返回下个状态
-int CCsvParser::PushChar(char ch)
+inline int CCsvParser::PushChar(char ch)
 {
     if ((delimiterChar == ch) && (CSV_ENCLOSURE_ENTER != quoteStatus))
     {
@@ -96,7 +96,7 @@ int CCsvParser::PushChar(char ch)
 }
 
 // 解析一行字符
-void CCsvParser::ParseLine(const std::string& line)
+inline void CCsvParser::ParseLine(const std::string& line)
 {
     // Parse line to row.
     for (size_t i = 0; i < line.size(); i++)

@@ -49,10 +49,10 @@ public:
     }
 
 private:
-    int PushChar(char ch);
-    void ParseLine(const std::string& line);
+    inline int PushChar(char ch);
+    inline void ParseLine(const std::string& line);
     inline void PushField();
-    void FinishRow();
+    inline void FinishRow();
 
 private:
     char delimiterChar = ',';  // COMMA ,
