@@ -24,7 +24,8 @@ void CCsvParser::Reset()
 void CCsvParser::Parse(const std::string& file_path)
 {
     // 总是以binary打开，防止Windows下替换"\r\n".
-    Parse(std::ifstream(file_path, std::ifstream::binary));
+    std::ifstream ifs(file_path, std::ifstream::binary);
+    Parse(ifs);
 }
 
 void IgnoreUtf8BOM(std::string& line)
