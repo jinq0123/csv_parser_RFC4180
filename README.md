@@ -38,3 +38,7 @@ TEXTDATA =  %x20-21 / %x23-2B / %x2D-7E
 * 允许字段中有回车。
 * 允许二进制字段。
 * 忽略所有错误，尽力解析。
+
+Build
+----------
+`premake5.exe --os=windows vs2015`

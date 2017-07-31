@@ -6,7 +6,7 @@ Usage:
 ]]
 
 workspace "csv_parser_RFC4180"
-	configurations { "ReleaseDLL", "ReleaseLib", "DebugDLL", "DebugLib" }
+	configurations { "Release", "Debug" }
 	platforms { "x64", "x32" }
 	language "C++"
 	-- flags { "StaticRuntime", }
@@ -19,11 +19,7 @@ workspace "csv_parser_RFC4180"
 	filter {}
 
 project "csv_parser_RFC4180"
-	filter { "configurations:*Lib" }
-		kind "StaticLib"
-	filter { "configurations:*DLL" }
-		kind "SharedLib"
-	filter {}
+	kind "StaticLib"
 	files { "csv_parser/csv_parser.h", "csv_parser/csv_parser.cpp" }
 
 project "test"
