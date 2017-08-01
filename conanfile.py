@@ -1,23 +1,29 @@
-from conans import ConanFile
+from conans import ConanFile, VisualStudioBuildEnvironment, tools
 
 class Csvparserrfc4180jinq0123Conan(ConanFile):
-    name = "csv_parser_RFC4180_jinq0123"
+    name = "csv_parser_RFC4180"
     version = "0.1"
     license = "Public"
     url = "https://github.com/jinq0123/csv_parser_RFC4180"
     description = "Csv parser based on RFC 4180"
     settings = "os", "compiler", "build_type", "arch"
     generators = "Premake"  # A custom generator: PremakeGen/0.1@memsharded/testing
-    exports_sources = "csv_parser/csv_parser.*"
+    exports_sources = "csv_parser/csv_parser.*", "premake5.lua"
 
     def requirements(self):
         self.requires("PremakeGen/0.1@memsharded/testing")
      
     def build(self):
-        # cmake = CMake(self)
-        # self.run('cmake %s/src %s' % (self.source_folder, cmake.command_line))
-        # self.run("cmake --build . %s" % cmake.build_config)
-        self.run("echo XXXXXXXXXXXXXXXXXXXXXXXXXXX")
+        if self.settings.compiler == "Visual Studio":
+           self.run("premake5.exe --os=windows vs2015")
+           env_build = VisualStudioBuildEnvironment(self)
+           with tools.environment_append(env_build.vars):
+               cmd = tools.msvc_build_command(self.settings,
+                   "csv_parser_RFC4180.sln",
+                   targets=["csv_parser_RFC4180"],
+                   upgrade_project = False)
+               self.run(cmd)
+        # End of if.
 
     def package(self):
         self.copy("*.h", dst="include")
@@ -28,4 +34,4 @@ class Csvparserrfc4180jinq0123Conan(ConanFile):
         self.copy("*.a", dst="lib", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["csv_parser_RFC4180_jinq0123"]
+        self.cpp_info.libs = ["csv_parser_RFC4180"]
