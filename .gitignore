@@ -35,3 +35,5 @@ ipch*
 /csv_parser_RFC4180.VC.opendb
 /csv_parser_RFC4180.VC.VC.opendb
 /csv_parser_RFC4180.VC.db
+/obj
+/bin
