@@ -15,14 +15,14 @@ class Csvparserrfc4180jinq0123Conan(ConanFile):
      
     def build(self):
         if self.settings.compiler == "Visual Studio":
-           self.run("premake5.exe --os=windows vs2015")
-           env_build = VisualStudioBuildEnvironment(self)
-           with tools.environment_append(env_build.vars):
-               cmd = tools.msvc_build_command(self.settings,
-                   "csv_parser_RFC4180.sln",
-                   targets=["csv_parser_RFC4180"],
-                   upgrade_project = False)
-               self.run(cmd)
+            self.run("premake5.exe --os=windows vs2015")
+            env_build = VisualStudioBuildEnvironment(self)
+            with tools.environment_append(env_build.vars):
+                cmd = tools.msvc_build_command(self.settings,
+                    "csv_parser_RFC4180.sln",
+                    targets=["csv_parser_RFC4180"],
+                    upgrade_project = False)
+                self.run(cmd)
         # End of if.
 
     def package(self):
