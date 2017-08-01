@@ -41,4 +41,7 @@ TEXTDATA =  %x20-21 / %x23-2B / %x2D-7E
 
 Build
 ----------
-`premake5.exe --os=windows vs2015`
+`premake5.exe --os=windows vs2015` 生成VS工程。
+`premake5 --os=linux gmake` 生成 Makefile.
+
+
