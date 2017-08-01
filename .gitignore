@@ -39,3 +39,5 @@ ipch*
 /bin
 /Makefile
 /*.make
+/test_package/build
+/test_package/conanfile.pyc
