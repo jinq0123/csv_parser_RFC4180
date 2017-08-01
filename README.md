@@ -41,8 +41,12 @@ TEXTDATA =  %x20-21 / %x23-2B / %x2D-7E
 
 Build
 ----------
-须安装[Premake5](http://premake.github.io/).
-`premake5.exe --os=windows vs2015` 生成VS工程。
-`premake5 --os=linux gmake` 生成 Makefile.
+用Premake生成VS工程或Makefile。
+* 须安装[Premake5](http://premake.github.io/).
+* `premake5.exe --os=windows vs2015` 生成VS工程。
+* `premake5 --os=linux gmake` 生成 Makefile.
 
-
+支持 conan
+------------
+1. 安装 [conan](http://docs.conan.io/en/latest/installation.html)
+2. `conan create user/channel -s os=Linux -s arch=x86_64 -s compiler=gcc -s build_type=Release`
