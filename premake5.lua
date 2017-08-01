@@ -1,4 +1,6 @@
--- premake5.lua
+-- premake5 file to build
+-- http://premake.github.io/
+--
 --[[
 Usage: 
 	premake5.exe --os=windows vs2015
