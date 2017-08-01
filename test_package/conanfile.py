@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake
 import os
 
-class Csvparserrfc4180jinq0123TestConan(ConanFile):
+class Csvparserrfc4180TestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
