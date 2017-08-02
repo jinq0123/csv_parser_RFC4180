@@ -10,8 +10,7 @@ class Csvparserrfc4180jinq0123Conan(ConanFile):
     generators = "Premake"  # A custom generator: PremakeGen/0.1@memsharded/testing
     exports_sources = "csv_parser/csv_parser.*", "premake5.lua"
 
-    def requirements(self):
-        self.requires("PremakeGen/0.1@memsharded/testing")
+    build_requires = "PremakeGen/0.1@memsharded/testing"
      
     def build(self):
         if self.settings.compiler == "Visual Studio":
@@ -22,6 +21,8 @@ class Csvparserrfc4180jinq0123Conan(ConanFile):
                     "csv_parser_RFC4180.sln",
                     targets=["csv_parser_RFC4180"],
                     upgrade_project = False)
+                if self.settings.arch == "x86":
+                    cmd = cmd.replace('p:Platform="x86"', 'p:Platform="Win32"')
                 self.run(cmd)
         # End of if.
 
